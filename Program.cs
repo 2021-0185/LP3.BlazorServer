@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using LP3.BlazorServer.Components;
 using LP3.BlazorServer.Components.Account;
 using LP3.BlazorServer.Data;
+using LP3.BlazorServer.Data.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,7 +26,10 @@ builder.Services.AddAuthentication(options =>
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(connectionString));
+builder.Services.AddScoped<IApplicationDbContext, ApplicationDbContext>();
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+builder.Services.AddScoped<IEstudianteRepository, EstudianteRepository>();
 
 builder.Services.AddIdentityCore<ApplicationUser>(options =>
     {

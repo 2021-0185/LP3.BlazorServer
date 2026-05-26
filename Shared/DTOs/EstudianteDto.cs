@@ -1,3 +1,5 @@
+using LP3.BlazorServer.Domain.Enums;
+
 namespace LP3.BlazorServer.Shared.DTOs;
 
 /// <summary>DTO para mostrar estudiantes en listados.</summary>
