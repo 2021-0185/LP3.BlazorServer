@@ -1,4 +1,5 @@
 using LP3.BlazorServer.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace LP3.BlazorServer.Data.Repositories;
 

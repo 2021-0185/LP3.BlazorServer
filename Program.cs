@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using LP3.BlazorServer.Components;
 using LP3.BlazorServer.Components.Account;
 using LP3.BlazorServer.Data;
@@ -30,8 +30,14 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<IApplicationDbContext, ApplicationDbContext>();
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+
+// Registro del módulo de Estudiantes
 builder.Services.AddScoped<IEstudianteRepository, EstudianteRepository>();
 builder.Services.AddScoped<IEstudianteService, EstudianteService>();
+
+// CORREGIDO: Registro del módulo de Cursos (Líneas limpias sin los operadores '<>' erróneos)
+builder.Services.AddScoped<ICursoRepository, CursoRepository>();
+builder.Services.AddScoped<ICursoService, CursoService>();
 
 builder.Services.AddIdentityCore<ApplicationUser>(options =>
     {

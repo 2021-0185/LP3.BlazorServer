@@ -281,9 +281,9 @@
     private EstudianteDto? estudianteAEliminar;   // CORREGIDO: guardamos el objeto completo
                                                   // para mostrar nombre en la confirmación
 
-    // ════════════════════════════════════════════════════════════════════════
+    
     // CICLO DE VIDA
-    // ════════════════════════════════════════════════════════════════════════
+    
 
     protected override async Task OnInitializedAsync()
     {
@@ -295,9 +295,9 @@
         estudiantes = await EstudianteService.GetAll();
     }
 
-    // ════════════════════════════════════════════════════════════════════════
+    
     // BÚSQUEDA
-    // ════════════════════════════════════════════════════════════════════════
+    
 
     private async Task BuscarPorMatricula()
     {
@@ -327,9 +327,9 @@
         mensajeBusqueda   = string.Empty;
     }
 
-    // ════════════════════════════════════════════════════════════════════════
+    
     // REGISTRO
-    // ════════════════════════════════════════════════════════════════════════
+    
 
     private async Task RegistrarEstudiante()
     {
@@ -359,9 +359,9 @@
         }
     }
 
-    // ════════════════════════════════════════════════════════════════════════
+    
     // EDICIÓN
-    // ════════════════════════════════════════════════════════════════════════
+    
 
     private void CargarParaEditar(EstudianteDto estudiante)
     {
@@ -405,9 +405,9 @@
         mensajeOperacion     = string.Empty;
     }
 
-    // ════════════════════════════════════════════════════════════════════════
+    
     // ELIMINACIÓN
-    // ════════════════════════════════════════════════════════════════════════
+    
 
     // CORREGIDO: recibe el objeto completo en lugar de solo el ID,
     // para poder mostrar el nombre en el cuadro de confirmación

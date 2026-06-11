@@ -1,4 +1,5 @@
 namespace LP3.BlazorServer.Data.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 public interface IRepository<T> where T : class
 {

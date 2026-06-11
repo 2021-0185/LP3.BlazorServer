@@ -1,0 +1,270 @@
+@page "/cursos"
+@using LP3.BlazorServer.Application.Services
+@using LP3.BlazorServer.Shared.DTOs
+@inject ICursoService CursoService
+
+
+<h3>📚Gestión de Cursos</h3>
+
+@* Alertas de Éxito / Error *@
+@if (!string.IsNullOrEmpty(mensajeResultado))
+{
+    <div class="alert @mensajeClase alert-dismissible fade show" role="alert">
+        @mensajeResultado
+        <button type="button" class="btn-close" @onclick="() => mensajeResultado = null"></button>
+    </div>
+}
+
+<div class="row mb-4">
+    @* --- SECCIÓN DE FORMULARIO (CREAR / EDITAR) --- *@
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5>@(esEdicion ? "Editar Curso" : "Crear Nuevo Curso")</h5>
+            </div>
+            <div class="card-body">
+                <EditForm Model="modeloFormulario" OnValidSubmit="GuardarCurso" FormName="FormularioCurso">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary class="text-danger" />
+
+                    <div class="mb-3">
+                        <label class="form-label">Nombre del Curso</label>
+                        <InputText class="form-control" @bind-Value="modeloFormulario.Nombre" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Código</label>
+                        <InputText class="form-control" @bind-Value="modeloFormulario.Codigo" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Créditos</label>
+                        <InputNumber class="form-control" @bind-Value="modeloFormulario.Creditos" />
+                    </div>
+
+                    @if (esEdicion)
+                    {
+                        <div class="mb-3 form-check">
+                            <InputCheckbox class="form-check-input" id="cursoActivo" @bind-Value="modeloFormulario.Activo" />
+                            <label class="form-check-label" for="cursoActivo">Curso Activo</label>
+                        </div>
+                    }
+
+                    <button type="submit" class="btn btn-success">
+                        @(esEdicion ? "Guardar Cambios" : "Registrar")
+                    </button>
+                    @if (esEdicion)
+                    {
+                        <button type="button" class="btn btn-secondary" @onclick="CancelarAccion">Cancelar</button>
+                    }
+                </EditForm>
+            </div>
+        </div>
+
+        @* --- TARJETA CONDICIONAL DE ELIMINACIÓN --- *@
+        @if (mostrarMensajeEliminar)
+        {
+            <div class="card border-danger mt-3">
+                <div class="card-header bg-danger text-white">
+                    <h5>Confirmar Eliminación</h5>
+                </div>
+                <div class="card-body">
+                    <p>¿Está seguro de que desea eliminar el curso <strong>@modeloFormulario.Nombre</strong>?</p>
+                    <button class="btn btn-danger" @onclick="ConfirmarEliminar">Sí, Eliminar</button>
+                    <button class="btn btn-secondary" @onclick="CancelarAccion">Cancelar</button>
+                </div>
+            </div>
+        }
+    </div>
+
+    @* --- SECCIÓN DE BÚSQUEDA Y TABLA (LISTADO) --- *@
+    <div class="col-md-8">
+        @* Barra de Búsqueda *@
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" placeholder="Buscar por código..." @bind="codigoBusqueda" />
+            <button class="btn btn-outline-primary" type="button" @onclick="BuscarPorCodigo">Buscar</button>
+            <button class="btn btn-outline-secondary" type="button" @onclick="async () => { codigoBusqueda = string.Empty; await CargarCursos(); }">Limpiar</button>
+        </div>
+
+        @* Tabla de Cursos *@
+        <div class="table-responsive">
+            <table class="table table-striped table-hover border">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Código</th>
+                        <th>Créditos</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (listaCursos != null && listaCursos.Any())
+                    {
+                        @foreach (var curso in listaCursos)
+                        {
+                            <tr>
+                                <td>@curso.Id</td>
+                                <td>@curso.Nombre</td>
+                                <td>@curso.Codigo</td>
+                                <td>@curso.Creditos</td>
+                                <td>
+                                    <span class="badge @(curso.Activo ? "bg-success" : "bg-danger")">
+                                        @(curso.Activo ? "Activo" : "Inactivo")
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-warning me-1" @onclick="() => SeleccionarEditar(curso)">Editar</button>
+                                    <button class="btn btn-sm btn-danger" @onclick="() => SeleccionarEliminar(curso)">Eliminar</button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center text-muted">No hay cursos disponibles.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@code {
+    // Listas y Modelos
+    private IEnumerable<CursoDto> listaCursos = new List<CursoDto>();
+    [SupplyParameterFromForm]
+    private CursoFormDto modeloFormulario { get; set; } = new CursoFormDto();
+    private string codigoBusqueda = string.Empty;
+
+    // Estados de la pantalla (Banderas)
+    private bool esEdicion = false;
+    private bool mostrarMensajeEliminar = false;
+    private string? mensajeResultado;
+    private string? mensajeClase;
+
+    // Se ejecuta al cargar la página
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarCursos();
+    }
+
+    private async Task CargarCursos()
+    {
+        listaCursos = await CursoService.GetAllAsync();
+    }
+
+    // 1. Lógica de Búsqueda
+    private async Task BuscarPorCodigo()
+    {
+        if (string.IsNullOrWhiteSpace(codigoBusqueda))
+        {
+            await CargarCursos();
+            mensajeResultado = null;
+            return;
+        }
+
+        var cursoEncontrado = await CursoService.GetByCodigoAsync(codigoBusqueda);
+        if (cursoEncontrado != null)
+        {
+            listaCursos = new List<CursoDto> { cursoEncontrado };
+            MostrarMensaje("Curso encontrado.", "alert-success");
+        }
+        else
+        {
+            listaCursos = new List<CursoDto>();
+            MostrarMensaje("No se encontró ningún curso con ese código.", "alert-warning");
+        }
+    }
+
+    // 2. Lógica de Guardar (Crear o Editar)
+    private async Task GuardarCurso()
+    {
+        bool exito;
+
+        if (esEdicion && modeloFormulario.Id.HasValue)
+        {
+            exito = await CursoService.UpdateAsync(modeloFormulario.Id.Value, modeloFormulario);
+        }
+        else
+        {
+            exito = await CursoService.CreateAsync(modeloFormulario);
+        }
+
+        if (exito)
+        {
+            MostrarMensaje("Operación realizada con éxito.", "alert-success");
+            LimpiarFormulario();
+            await CargarCursos();
+        }
+        else
+        {
+            MostrarMensaje("Ocurrió un error al procesar la solicitud.", "alert-danger");
+        }
+    }
+
+    // 3. Preparar Edición
+    private void SeleccionarEditar(CursoDto curso)
+    {
+        esEdicion = true;
+        mostrarMensajeEliminar = false;
+        
+        // Precargamos el formulario
+        modeloFormulario = new CursoFormDto
+        {
+            Id = curso.Id,
+            Nombre = curso.Nombre,
+            Codigo = curso.Codigo,
+            Creditos = curso.Creditos,
+            Activo = curso.Activo
+        };
+    }
+
+    // 4. Preparar Eliminación
+    private void SeleccionarEliminar(CursoDto curso)
+    {
+        mostrarMensajeEliminar = true;
+        modeloFormulario.Id = curso.Id;
+        modeloFormulario.Nombre = curso.Nombre;
+    }
+
+    private async Task ConfirmarEliminar()
+    {
+        if (modeloFormulario.Id.HasValue)
+        {
+            var exito = await CursoService.DeleteAsync(modeloFormulario.Id.Value);
+            if (exito)
+            {
+                MostrarMensaje("Curso eliminado correctamente.", "alert-success");
+                await CargarCursos();
+            }
+            else
+            {
+                MostrarMensaje("No se pudo eliminar el curso.", "alert-danger");
+            }
+            CancelarAccion();
+        }
+    }
+
+    // Auxiliares
+    private void CancelarAccion()
+    {
+        LimpiarFormulario();
+    }
+
+    private void LimpiarFormulario()
+    {
+        modeloFormulario = new CursoFormDto();
+        esEdicion = false;
+        mostrarMensajeEliminar = false;
+    }
+
+    private void MostrarMensaje(string texto, string claseCss)
+    {
+        mensajeResultado = texto;
+        mensajeClase = claseCss;
+    }
+}
