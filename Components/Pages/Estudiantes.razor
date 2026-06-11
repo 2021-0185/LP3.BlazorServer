@@ -10,9 +10,9 @@
     <h1>📚 Gestión de Estudiantes</h1>
     <p class="text-muted">Aquí puedes crear, consultar, editar y eliminar estudiantes</p>
 
-    <!-- ══════════════════════════════════════════════════
+    
          SECCIÓN 1: BÚSQUEDA POR MATRÍCULA
-         ══════════════════════════════════════════════════ -->
+         
     <div class="card mb-4">
         <div class="card-body">
             <h4>🔍 Buscar Estudiante por Matrícula</h4>
@@ -57,9 +57,9 @@
         </div>
     </div>
 
-    <!-- ══════════════════════════════════════════════════
+    
          SECCIÓN 2: REGISTRAR NUEVO ESTUDIANTE
-         ══════════════════════════════════════════════════ -->
+         
     <div class="card mb-4">
         <div class="card-body">
             <h4>➕ Registrar Nuevo Estudiante</h4>
@@ -114,9 +114,9 @@
         </div>
     </div>
 
-    <!-- ══════════════════════════════════════════════════
+    
          SECCIÓN 3: TABLA DE ESTUDIANTES
-         ══════════════════════════════════════════════════ -->
+         
     <div class="card">
         <div class="card-body">
             <h4>📊 Estudiantes Registrados (@(estudiantes?.Count ?? 0))</h4>
@@ -169,10 +169,10 @@
         </div>
     </div>
 
-    <!-- ══════════════════════════════════════════════════
+    
          SECCIÓN 4: FORMULARIO DE EDICIÓN
-         (aparece debajo de la tabla al hacer clic en Editar)
-         ══════════════════════════════════════════════════ -->
+         
+         
     @if (editandoEstudiante != null)
     {
         <div class="card mt-4 border-warning">
@@ -224,10 +224,10 @@
         </div>
     }
 
-    <!-- ══════════════════════════════════════════════════
+    
          SECCIÓN 5: CONFIRMACIÓN DE ELIMINACIÓN
          (aparece junto a la tabla, muestra nombre del estudiante)
-         ══════════════════════════════════════════════════ -->
+         
     @if (mostrarConfirmacionEliminar && estudianteAEliminar != null)
     {
         <div class="card mt-4 border-danger">
